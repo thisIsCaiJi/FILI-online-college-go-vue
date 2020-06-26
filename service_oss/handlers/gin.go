@@ -1,17 +1,16 @@
-package router
+package handlers
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
+	"github.com/thisIsCaiJi/online_college/service_oss/config"
+	"github.com/thisIsCaiJi/online_college/service_oss/util"
 )
 
-func Router(app *gin.Engine){
+var app = gin.Default()
+
+func init(){
 	app.Use(cors)
-	uGroup := app.Group("/eduservice/user")
-	userRouter(uGroup)
-	teacherGroup := app.Group("/eduservice/edu-teacher")
-	teacherRouter(teacherGroup)
 }
 
 func cors(ctx *gin.Context){
@@ -25,4 +24,13 @@ func cors(ctx *gin.Context){
 		return
 	}
 	ctx.Next()
+}
+
+func ServerRun() {
+	port := config.Yml.ServerConf.Port
+	app.Run(fmt.Sprintf(":%d",port))
+}
+
+func Close(){
+	//model.Close()
 }

@@ -1,11 +1,15 @@
-package controller
+package handlers
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/thisIsCaiJi/online_college/service_oss/service"
 	"github.com/thisIsCaiJi/online_college/service_oss/util"
 )
+
+func init(){
+	group := app.Group("/eduoss")
+	group.POST("/fileoss",UploadFileAvtar)
+}
 
 func UploadFileAvtar(context *gin.Context)  {
 	file, header, err := context.Request.FormFile("file")
@@ -14,7 +18,13 @@ func UploadFileAvtar(context *gin.Context)  {
 		context.JSON(200,util.ReturnError().H())
 		return
 	}
-	url,err := service.UploadFileAvtar(file,header)
+	dataLen := header.Size
+	if dataLen > int64(2)*1024*1024 {
+		context.JSON(200,util.ReturnError().Message("File size cannot be greater than 2MB!").H())
+		return
+	}
+	// 上传文件流。
+	url,err := util.UploadFile(file,header)
 	if err != nil {
 		context.JSON(200,util.ReturnError().Message(err.Error()).H())
 		return

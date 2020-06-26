@@ -1,9 +1,16 @@
-package controller
+package handlers
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/thisIsCaiJi/online_college/service_edu/util"
 )
+
+func init() {
+	appGroup := app.Group("/eduservice/user")
+	appGroup.POST("/login",Login)
+	appGroup.GET("/info",Info)
+	appGroup.POST("/logout",Logout)
+}
 
 func Login(ctx *gin.Context) {
 	ctx.JSON(200, util.ReturnOk().DataKV("token", "admin").H())

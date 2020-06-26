@@ -10,6 +10,7 @@ var Yml *Yaml
 
 type Yaml struct {
 	SqlConf Mysql `yaml:"mysql"`
+	ServerConf Server `yaml:"server"`
 }
 
 type Mysql struct{
@@ -19,20 +20,22 @@ type Mysql struct{
 	Name string`yaml:"name"`
 }
 
-func GetDataBaseConfig() *Mysql {
-	if Yml != nil {
-		return &Yml.SqlConf
-	}
+type Server struct {
+	Port int `yaml:"port"`
+}
+
+func init() {
 	yamlFile,err := ioutil.ReadFile("conf.yaml")
 	if err != nil {
 		logrus.Errorf("读取配置文件失败，err: %v\n",err)
-		return nil
 	}
-	d := &Yaml{}
-	err = yaml.Unmarshal(yamlFile,d)
+	Yml = &Yaml{}
+	err = yaml.Unmarshal(yamlFile,Yml)
 	if err != nil {
 		logrus.Errorf("解析配置文件失败，err: %v\n",err)
-		return nil
 	}
-	return &d.SqlConf
+}
+
+func GetDataBaseConfig() *Mysql {
+	return &Yml.SqlConf
 }

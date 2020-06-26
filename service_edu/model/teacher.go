@@ -21,7 +21,7 @@ type EduTeacher struct {
 	GmtModified time.Time `json:"gmtModified"`
 }
 
-func (EduTeacher) TableName() string {
+func (*EduTeacher) TableName() string {
 	return "edu_teacher"
 }
 
@@ -32,7 +32,7 @@ type TeacherQuery struct {
 	End   string `json:"end"`
 }
 
-func TeacherList(current, limit int,query TeacherQuery) ([]EduTeacher,int) {
+func (t *EduTeacher) List(current, limit int,query TeacherQuery) (*[]EduTeacher,int,error) {
 	logrus.Infof("query:%v\n",query)
 	var eduTeacher []EduTeacher
 	var total int
@@ -54,41 +54,45 @@ func TeacherList(current, limit int,query TeacherQuery) ([]EduTeacher,int) {
 		whereSql += " and gmt_create < ?"
 		whereValue = append(whereValue,query.End)
 	}
-	DB.Self.Where(whereSql,whereValue...).Limit(limit).Offset((current-1) * limit).Find(&eduTeacher)
-	DB.Self.Table(EduTeacher{}.TableName()).Where(whereSql,whereValue...).Count(&total)
+	if err := db.Where(whereSql,whereValue...).Limit(limit).Offset((current-1) * limit).Find(&eduTeacher).Error;err != nil {
+		return nil,0,err
+	}
+	if err := db.Model(t).Where(whereSql,whereValue...).Count(&total).Error;err != nil {
+		return nil,0,err
+	}
 	fmt.Printf("total:%v\n",total)
-	return eduTeacher,total
+	return &eduTeacher,total,nil
 }
 
-func AddTeacher(teacher EduTeacher) error {
+func (t *EduTeacher) Add() error {
 	currWoker := &idworker.IdWorker{}
 	currWoker.InitIdWorker(1000, 1)
 	id,err := currWoker.NextId()
 	if err!=nil {
 		return err
 	}
-	teacher.Id = strconv.FormatInt(id,10)
-	teacher.GmtCreate = time.Now()
-	teacher.GmtModified = time.Now()
-	if err := DB.Self.Create(teacher).Error; err != nil {
+	t.Id = strconv.FormatInt(id,10)
+	t.GmtCreate = time.Now()
+	t.GmtModified = time.Now()
+	if err := db.Create(t).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetTeacherById(id string) (EduTeacher,error) {
+func (t *EduTeacher) GetById() (EduTeacher,error) {
 	var teacher EduTeacher
-	err := DB.Self.Where("id = ?",id).Find(&teacher).Error
+	err := db.Where("id = ?",t.Id).Find(&teacher).Error
 	return teacher,err
 }
 
-func UpdateTeacher(teacher EduTeacher) error{
-	teacher.GmtModified = time.Now()
-	err := DB.Self.Save(&teacher).Error
+func (t *EduTeacher) Update() error{
+	t.GmtModified = time.Now()
+	err := db.Save(t).Error
 	return err
 }
 
-func RemoveTeacher(id string) error{
-	err := DB.Self.Model(&EduTeacher{}).Where("id = ?",id).Update("is_deleted",1).Error
+func (t *EduTeacher) Remove() error{
+	err := db.Model(&EduTeacher{}).Where("id = ?",t.Id).Update("is_deleted",1).Error
 	return err
 }
