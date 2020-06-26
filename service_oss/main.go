@@ -20,7 +20,7 @@ func main() {
 
 	router.Router(app)
 	// 指定地址和端口号
-	app.Run("localhost:8082")
+	app.Run(":8082")
 	//ossService := service.NewOssService()
 	//url := ossService.UploadFileAvtar()
 	//fmt.Printf("%s\n",url)
