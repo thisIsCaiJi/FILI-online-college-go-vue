@@ -2,25 +2,22 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
 )
 
 func init() {
-	appGroup := app.Group("/eduservice/user")
-	appGroup.POST("/login",Login)
-	appGroup.GET("/info",Info)
-	appGroup.POST("/logout",Logout)
+	group.POST("/eduservice/user/login",Login)
+	group.GET("/eduservice/user/info",Info)
+	group.POST("/eduservice/user/logout",Logout)
 }
 
 func Login(ctx *gin.Context) {
-	ctx.JSON(200, util.ReturnOk().DataKV("token", "admin").H())
+	JsonSuccessKV(ctx,"token","admin")
 }
 
 func Info(ctx *gin.Context) {
-	ctx.JSON(200, util.ReturnOk().DataKV("roles", []string{"admin"}).DataKV("name", "admin1").
-		DataKV("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif").H())
+	JsonSuccessMap(ctx,map[string]interface{}{"roles":[]string{"admin"},"name": "admin1","avatar":"https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif"})
 }
 
 func Logout(ctx *gin.Context) {
-	ctx.JSON(200, util.ReturnOk().H())
+	JsonSuccess(ctx)
 }

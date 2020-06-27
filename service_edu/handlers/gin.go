@@ -5,10 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thisIsCaiJi/online_college/service_edu/config"
 	"github.com/thisIsCaiJi/online_college/service_edu/model"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
 )
 
 var app = gin.Default()
+
+var group = app.Group("/api",cors)
 
 func init(){
 	app.Use(cors)
@@ -20,7 +21,7 @@ func cors(ctx *gin.Context){
 	ctx.Header("content-type", "application/json")             //返回数据格式是json
 	ctx.Header("Access-Control-Allow-Methods","GET,POST,PUT,PATCH,DELETE,OPTIONS")
 	if ctx.Request.Method == "OPTIONS" {
-		ctx.JSON(200,util.ReturnOk().H())
+		JsonSuccess(ctx)
 		return
 	}
 	ctx.Next()

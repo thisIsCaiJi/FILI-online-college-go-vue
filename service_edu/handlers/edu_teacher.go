@@ -4,21 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/thisIsCaiJi/online_college/service_edu/model"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"strconv"
 )
 
-func init(){
-	group := app.Group("/eduservice/edu-teacher")
-	group.POST("/pageTeacherCondition/:current/:limit",PageTeacherConditionPost)
-
-	group.POST("/addTeacher",AddTeacher)
-
-	group.GET("/getTeacher/:id",GetTeacherById)
-
-	group.POST("/updateTeacher",UpdateTeacher)
-
-	group.DELETE("/:id",RemoveTeacher)
+func init() {
+	group.POST("/eduservice/edu-teacher/pageTeacherCondition/:current/:limit", PageTeacherConditionPost)
+	group.POST("/eduservice/edu-teacher/addTeacher", AddTeacher)
+	group.GET("/eduservice/edu-teacher/getTeacher/:id", GetTeacherById)
+	group.POST("/eduservice/edu-teacher/updateTeacher", UpdateTeacher)
+	group.DELETE("/eduservice/edu-teacher/:id", RemoveTeacher)
+	group.GET("/eduservice/edu-teacher/all", TeacherList)
 }
 
 func PageTeacherConditionPost(ctx *gin.Context) {
@@ -29,32 +24,33 @@ func PageTeacherConditionPost(ctx *gin.Context) {
 		logrus.Infof("获取参数失败，err:%v\n", err)
 	}
 	current, limit := ctx.Param("current"), ctx.Param("limit")
-	var currentInt,limitInt int
-	if currentInt,err = strconv.Atoi(current);err != nil {
+	var currentInt, limitInt int
+	if currentInt, err = strconv.Atoi(current); err != nil {
 		currentInt = 1
 	}
-	if limitInt,err = strconv.Atoi(limit);err != nil {
+	if limitInt, err = strconv.Atoi(limit); err != nil {
 		limitInt = 5
 	}
 	teachers, total, err := eduteacher.List(currentInt, limitInt, query)
 	if err != nil {
 		logrus.Errorf("分页查询讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonError(ctx)
 		return
 	}
-	ctx.JSON(200, util.ReturnOk().DataKV("rows", teachers).DataKV("total", total).H())
+	JsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
 }
 
 func AddTeacher(ctx *gin.Context) {
 	var eduTeacher model.EduTeacher
 	ctx.ShouldBindJSON(&eduTeacher)
+	eduTeacher.Id = ""
 	err := eduTeacher.Add()
 	if err != nil {
 		logrus.Errorf("添加讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonError(ctx)
 		return
 	}
-	ctx.JSON(200, util.ReturnOk().H())
+	JsonSuccess(ctx)
 }
 
 func GetTeacherById(ctx *gin.Context) {
@@ -64,39 +60,50 @@ func GetTeacherById(ctx *gin.Context) {
 	teacher, err := eduTeacher.GetById()
 	if err != nil {
 		logrus.Errorf("查询讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonError(ctx)
 		return
 	}
-	ctx.JSON(200, util.ReturnOk().DataKV("teacher",teacher).H())
+	JsonSuccessKV(ctx, "teacher", teacher)
 }
 
 func UpdateTeacher(ctx *gin.Context) {
 	var eduTeacher model.EduTeacher
 	ctx.ShouldBindJSON(&eduTeacher)
-	t,err := eduTeacher.GetById()
+	t, err := eduTeacher.GetById()
 	if err != nil {
 		logrus.Errorf("修改讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonSuccess(ctx)
 		return
 	}
 	eduTeacher.GmtCreate = t.GmtCreate
 	err = eduTeacher.Update()
 	if err != nil {
 		logrus.Errorf("修改讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonError(ctx)
 		return
 	}
-	ctx.JSON(200, util.ReturnOk().H())
+	JsonSuccess(ctx)
 }
 
 func RemoveTeacher(ctx *gin.Context) {
 	id := ctx.Param("id")
-	eduTeacher := model.EduTeacher{Id:id}
+	eduTeacher := model.EduTeacher{Id: id}
 	err := eduTeacher.Remove()
 	if err != nil {
 		logrus.Errorf("逻辑删除讲师数据失败,err:%v\n", err)
-		ctx.JSON(200, util.ReturnError().H())
+		JsonError(ctx)
 		return
 	}
-	ctx.JSON(200, util.ReturnOk().H())
+	JsonSuccess(ctx)
+}
+
+func TeacherList(ctx *gin.Context) {
+	eduTeacher := &model.EduTeacher{}
+	teachers, total, err := eduTeacher.All()
+	if err != nil {
+		HandlerError(err, "查询讲师数据失败")
+		JsonErrorMessage(ctx, "查询讲师数据失败")
+		return
+	}
+	JsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
 }

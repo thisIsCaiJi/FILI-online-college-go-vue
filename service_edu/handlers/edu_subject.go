@@ -4,33 +4,31 @@ import (
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gin-gonic/gin"
 	"github.com/thisIsCaiJi/online_college/service_edu/model"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"path"
 )
 
 func init(){
-	group := app.Group("/eduservice/subject",cors)
-
-	group.POST("/import",ImportSubject)
-	group.GET("/allSubject",GetAllSubject)
+	group.POST("/eduservice/subject/import",ImportSubject)
+	group.GET("/eduservice/subject/allSubject",GetAllSubject)
 }
 
 func ImportSubject(ctx *gin.Context) {
 	file, header, err := ctx.Request.FormFile("file")
 	if err != nil {
 		HandlerError(err,"上传失败")
-		ctx.JSON(200,util.ReturnError().H())
+		JsonErrorMessage(ctx,"上传失败")
 		return
 	}
 	ty := path.Ext(header.Filename)
 	if ty != ".xlsx" {
-		ctx.JSON(200,util.ReturnError().Message("只能上传.xlsx表格文件").H())
+		HandlerError(err,"只能上传.xlsx表格文件")
+		JsonErrorMessage(ctx,"只能上传.xlsx表格文件")
 		return
 	}
 	xlFile,err := excelize.OpenReader(file)
 	if err != nil {
 		HandlerError(err,"上传失败")
-		ctx.JSON(200,util.ReturnError().Message("上传失败").H())
+		JsonErrorMessage(ctx,"上传失败")
 		return
 	}
 	rows := xlFile.GetRows("课程信息")
@@ -62,7 +60,7 @@ func ImportSubject(ctx *gin.Context) {
 			}
 		}
 	}
-	ctx.JSON(200,util.ReturnOk().H())
+	JsonSuccess(ctx)
 }
 
 //课程分类列表，树形结构
@@ -99,6 +97,6 @@ func GetAllSubject(ctx *gin.Context){
 			*m[sub2.ParentId] = append(*m[sub2.ParentId],two)
 		}
 	}
-	ctx.JSON(200,util.ReturnOk().DataKV("list",list).H())
+	JsonSuccessKV(ctx,"list",list)
 }
 
