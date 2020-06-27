@@ -1,10 +1,8 @@
 package model
 
 import (
-	"fmt"
-	"github.com/gitstliu/go-id-worker"
 	"github.com/sirupsen/logrus"
-	"strconv"
+	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"time"
 )
 
@@ -60,18 +58,15 @@ func (t *EduTeacher) List(current, limit int,query TeacherQuery) (*[]EduTeacher,
 	if err := db.Model(t).Where(whereSql,whereValue...).Count(&total).Error;err != nil {
 		return nil,0,err
 	}
-	fmt.Printf("total:%v\n",total)
 	return &eduTeacher,total,nil
 }
 
 func (t *EduTeacher) Add() error {
-	currWoker := &idworker.IdWorker{}
-	currWoker.InitIdWorker(1000, 1)
-	id,err := currWoker.NextId()
+	id,err := util.GetId()
 	if err!=nil {
 		return err
 	}
-	t.Id = strconv.FormatInt(id,10)
+	t.Id = id
 	t.GmtCreate = time.Now()
 	t.GmtModified = time.Now()
 	if err := db.Create(t).Error; err != nil {
@@ -93,6 +88,6 @@ func (t *EduTeacher) Update() error{
 }
 
 func (t *EduTeacher) Remove() error{
-	err := db.Model(&EduTeacher{}).Where("id = ?",t.Id).Update("is_deleted",1).Error
+	err := db.Model(t).Where("id = ?",t.Id).Update("is_deleted",1).Error
 	return err
 }

@@ -14,7 +14,6 @@ func init(){
 }
 
 func cors(ctx *gin.Context){
-	fmt.Printf("request mode:%v\n",ctx.Request.Method)
 	ctx.Header("Access-Control-Allow-Origin", "*")             //允许访问所有域
 	ctx.Header("Access-Control-Allow-Headers", "Content-Type,x-token") //header的类型
 	ctx.Header("content-type", "application/json")             //返回数据格式是json
