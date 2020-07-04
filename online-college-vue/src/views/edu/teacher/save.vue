@@ -27,6 +27,7 @@
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
+          accept=".jpg,.png,.gif"
         >
           <img v-if="teacher.avatar" :src="teacher.avatar" class="avatar" />
           <i v-else class="el-icon-plus avatar-uploader-icon"></i>

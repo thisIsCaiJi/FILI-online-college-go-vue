@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"time"
 )
 
@@ -14,7 +13,7 @@ type EduTeacher struct {
 	Level       int       `json:"level"`
 	Avatar      string    `json:"avatar"`
 	Sort        int       `json:"sort"`
-	IsDeleted   int       `json:"isDeleted"`
+	IsDelete    int `json:"is_delete"`
 	GmtCreate   time.Time `json:"gmtCreate"`
 	GmtModified time.Time `json:"gmtModified"`
 }
@@ -34,7 +33,7 @@ func (t *EduTeacher) List(current, limit int, query TeacherQuery) (*[]EduTeacher
 	logrus.Infof("query:%v\n", query)
 	var eduTeacher []EduTeacher
 	var total int
-	whereSql := "is_deleted = 0"
+	whereSql := "is_delete = 0"
 	var whereValue []interface{}
 	if query.Name != "" {
 		whereSql += " and name like ?"
@@ -52,48 +51,41 @@ func (t *EduTeacher) List(current, limit int, query TeacherQuery) (*[]EduTeacher
 		whereSql += " and gmt_create < ?"
 		whereValue = append(whereValue, query.End)
 	}
-	if err := db.Where(whereSql, whereValue...).Limit(limit).Offset((current - 1) * limit).Find(&eduTeacher).Error; err != nil {
-		return nil, 0, err
-	}
-	if err := db.Model(t).Where(whereSql, whereValue...).Count(&total).Error; err != nil {
+	if err := db.Model(t).Where(whereSql, whereValue...).Count(&total).Limit(limit).Offset((current - 1) * limit).Find(&eduTeacher).Error; err != nil {
 		return nil, 0, err
 	}
 	return &eduTeacher, total, nil
 }
 
 func (t *EduTeacher) Add() error {
-	id, err := util.GetId()
-	if err != nil {
-		return err
-	}
-	t.Id = id
-	t.GmtCreate = time.Now()
-	t.GmtModified = time.Now()
-	if err := db.Create(t).Error; err != nil {
-		return err
-	}
-	return nil
+	return Create(t)
 }
 
-func (t *EduTeacher) GetById() (EduTeacher, error) {
-	var teacher EduTeacher
-	err := db.Where("id = ?", t.Id).Find(&teacher).Error
-	return teacher, err
+func (t *EduTeacher) GetById() (one *EduTeacher,err error) {
+	one = &EduTeacher{}
+	m := &EduTeacher{Id:t.Id,IsDelete:0}
+	err = One(m,one)
+	return
 }
 
 func (t *EduTeacher) Update() error {
-	t.GmtModified = time.Now()
-	err := db.Save(t).Error
+	err := Update(t)
 	return err
 }
 
 func (t *EduTeacher) Remove() error {
-	err := db.Model(t).Where("id = ?", t.Id).Update("is_deleted", 1).Error
+	err := db.Model(t).Update("is_delete",1).Error
+	return err
+}
+
+func (t *EduTeacher) Delete() error {
+	err := Remove(t)
 	return err
 }
 
 func (t *EduTeacher) All() (teachers *[]EduTeacher,total uint,err error) {
 	teachers = &[]EduTeacher{}
+	t.IsDelete = 0
 	total,err = List(t,teachers)
 	return
 }

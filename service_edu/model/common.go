@@ -34,14 +34,12 @@ func Create(m interface{}) error {
 }
 
 func ListPage(m interface{},current,limit int,list interface{}) (total uint,err error) {
-	db.Model(m).Where(m).Count(&total)
-	err = db.Where(m).Limit(limit).Offset((current-1) * limit).Find(list).Find(list).Error
+	err = db.Model(m).Where(m).Count(&total).Limit(limit).Offset((current-1) * limit).Find(list).Error
 	return total,err
 }
 
 func List(m interface{}, list interface{}) (total uint,err error) {
-	db.Model(m).Where(m).Count(&total)
-	err = db.Where(m).Find(list).Find(list).Error
+	err = db.Model(m).Where(m).Count(&total).Find(list).Find(list).Error
 	return total,err
 }
 
@@ -57,7 +55,7 @@ func Update(m interface{}) error {
 }
 
 func Remove(m interface{}) error {
-	return db.Where(m).Update("is_deleted",1).Error
+	return db.Delete(m).Error
 }
 
 func One(m interface{},one interface{}) error {

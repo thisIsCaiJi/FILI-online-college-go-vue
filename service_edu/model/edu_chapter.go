@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+
 //EduChapter
 type EduChapter struct {
 	CourseId    string    `gorm:"column:course_id" form:"course_id" json:"course_id" comment:"课程ID" columnType:"char(19)" dataType:"char" columnKey:"MUL"`
@@ -51,4 +52,15 @@ func (m *EduChapter) Create() (err error) {
 //Delete
 func (m *EduChapter) Delete() (err error) {
 	return Remove(m)
+}
+
+
+type ChapterVo struct {
+	Id string`json:"id"`
+	title string`json:"title"`
+	Children *[]VideoVo`json:"children"`
+}
+
+func OneChapterVo() *ChapterVo {
+	return &ChapterVo{Children:&[]VideoVo{}}
 }

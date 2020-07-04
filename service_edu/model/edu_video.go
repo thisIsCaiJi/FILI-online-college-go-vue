@@ -61,3 +61,8 @@ func (m *EduVideo) Create() (err error) {
 func (m *EduVideo) Delete() (err error) {
 	return Remove(m)
 }
+
+type VideoVo struct {
+	Id string`json:"id"`
+	title string`json:"title"`
+}

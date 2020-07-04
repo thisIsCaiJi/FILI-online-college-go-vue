@@ -7,8 +7,7 @@ import (
 )
 
 func init(){
-	group := app.Group("/eduoss")
-	group.POST("/fileoss",UploadFileAvtar)
+	group.POST("/eduoss/fileoss",UploadFileAvtar)
 }
 
 func UploadFileAvtar(context *gin.Context)  {
