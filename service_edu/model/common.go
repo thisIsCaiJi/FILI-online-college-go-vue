@@ -2,13 +2,14 @@ package model
 
 import (
 	"errors"
+	"github.com/jinzhu/gorm"
 	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"reflect"
 	"time"
 )
 
-// 公共创建方法，当id为空时会生成id
-func Create(m interface{}) error {
+// 公共创建方法，当id为空时会生成id,当tx不为空时为事务性
+func Create(m interface{},tx ...*gorm.DB) error {
 	id,err := util.GetId()
 	if err!=nil {
 		return err
@@ -30,6 +31,9 @@ func Create(m interface{}) error {
 			idv.SetString(id)
 		}
 	}
+	if len(tx) != 0 && tx[0] !=nil {
+		return tx[0].Create(m).Error
+	}
 	return db.Create(m).Error
 }
 
@@ -43,7 +47,8 @@ func List(m interface{}, list interface{}) (total uint,err error) {
 	return total,err
 }
 
-func Update(m interface{}) error {
+// 当tx不为空时为事务性
+func Update(m interface{},tx ...*gorm.DB) error {
 	t := reflect.ValueOf(time.Now())
 	v := reflect.ValueOf(m)
 	v = v.Elem()
@@ -51,10 +56,17 @@ func Update(m interface{}) error {
 	if gmtModified.CanSet() {
 		gmtModified.Set(t)
 	}
-	return db.Save(m).Error
+	if len(tx) != 0 && tx[0] !=nil {
+		return tx[0].Model(m).Omit("gmt_create").Updates(m).Error
+	}
+	return db.Model(m).Omit("gmt_create").Updates(m).Error
 }
 
-func Remove(m interface{}) error {
+// 当tx不为空时为事务性
+func Remove(m interface{},tx ...*gorm.DB) error {
+	if len(tx) != 0 && tx[0] !=nil {
+		return tx[0].Delete(m).Error
+	}
 	return db.Delete(m).Error
 }
 
@@ -64,4 +76,10 @@ func One(m interface{},one interface{}) error {
 	}
 	return nil
 }
+
+func Count(m interface{}) (total int) {
+	db.Model(m).Where(m).Count(&total)
+	return
+}
+
 

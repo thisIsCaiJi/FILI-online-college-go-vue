@@ -62,7 +62,11 @@ func (m *EduVideo) Delete() (err error) {
 	return Remove(m)
 }
 
+func (m *EduVideo) Count() (total int) {
+	return Count(m)
+}
+
 type VideoVo struct {
 	Id string`json:"id"`
-	title string`json:"title"`
+	Title string`json:"title"`
 }

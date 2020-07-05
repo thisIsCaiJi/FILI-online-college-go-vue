@@ -24,7 +24,7 @@
         <el-select
           v-model="courseInfo.subject_parent_id"
           clearable
-          placeholder="请选择"
+          placeholder="一级分类"
           @change="getTwoSubject"
         >
           <el-option
@@ -34,7 +34,7 @@
             :value="subject.id"
           ></el-option>
         </el-select>
-        <el-select v-model="courseInfo.subject_id" clearable placeholder="请选择">
+        <el-select v-model="courseInfo.subject_id" clearable placeholder="二级分类">
           <el-option
             v-for="subject in subjectTwoList"
             :key="subject.id"
@@ -71,7 +71,7 @@
       :disabled="saveBtnDisabled"
       type="primary"
       style="margin-top: 12px;"
-      @click="saveAndNext"
+      @click="saveOrUpdate"
     >保存并下一步</el-button>
   </div>
 </template>
@@ -91,23 +91,37 @@ export default {
         lesson_num: 0,
         price: 0,
         subject_id: "",
-        description:"",
+        description: "",
         cover:
-          "https://fili-online-college-0001.oss-cn-shenzhen.aliyuncs.com/u%3D2496386706%2C575791735%26fm%3D26%26gp%3D0.jpg"
+          "https://fili-online-college-0001.oss-cn-shenzhen.aliyuncs.com/8aebdb03f31b4d12a6166c4baf9d031f.png"
       },
       teacherList: [],
       subjectOneList: [],
       subjectTwoList: [],
-      baseApi: process.env.VUE_APP_BASE_API
+      baseApi: process.env.VUE_APP_BASE_API,
+      courseId: ""
     };
   },
   created() {
+    if (this.$route.params && this.$route.params.id) {
+      this.courseId = this.$route.params.id;
+      this.getInfo();
+    }
     this.getListTeacher();
     this.getOneSubject();
   },
   methods: {
-    saveAndNext() {
-      courseApi.addCourseInfo(this.courseInfo).then(response => {
+    getInfo() {
+      courseApi.getCourseInfo(this.courseId).then(response => {
+        subjectApi.getAllSubject().then(response1 => {
+          this.subjectOneList = response1.data.list;
+          this.getTwoSubject(response.data.courseInfo.subject_parent_id);
+          this.courseInfo = response.data.courseInfo;
+        });
+      });
+    },
+    addCourseInfo(courseInfo) {
+      courseApi.addCourseInfo(courseInfo).then(response => {
         this.$message({
           message: "添加课程信息成功",
           type: "success"
@@ -115,6 +129,22 @@ export default {
         var id = response.data.id;
         this.$router.push({ path: `/course/chapter/${id}` });
       });
+    },
+    updateCourseInfo(courseInfo) {
+      courseApi.updateCourseInfo(courseInfo).then(response => {
+        this.$message({
+          message: "修改课程信息成功",
+          type: "success"
+        });
+        this.$router.push({ path: `/course/chapter/${this.courseId}` });
+      });
+    },
+    saveOrUpdate() {
+      if (!this.courseInfo.id){
+        this.addCourseInfo(this.courseInfo)
+      }else {
+        this.updateCourseInfo(this.courseInfo)
+      }
     },
     getListTeacher() {
       courseApi.getListTeacher().then(response => {
@@ -129,12 +159,10 @@ export default {
     getTwoSubject(value) {
       this.subjectTwoList = [];
       this.courseInfo.subject_id = "";
-      subjectApi.getAllSubject().then(response => {
-        this.subjectOneList.forEach(one => {
-          if (one.id === value) {
-            this.subjectTwoList = one.children;
-          }
-        });
+      this.subjectOneList.forEach(one => {
+        if (one.id === value) {
+          this.subjectTwoList = one.children;
+        }
       });
     },
     //上传封面成功回调方法

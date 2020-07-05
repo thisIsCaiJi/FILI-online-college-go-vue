@@ -57,7 +57,7 @@ func (m *EduChapter) Delete() (err error) {
 
 type ChapterVo struct {
 	Id string`json:"id"`
-	title string`json:"title"`
+	Title string`json:"title"`
 	Children *[]VideoVo`json:"children"`
 }
 

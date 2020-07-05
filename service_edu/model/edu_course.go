@@ -1,10 +1,12 @@
 package model
 
 import (
+	"github.com/thisIsCaiJi/online_college/service_edu/util"
 	"time"
 )
 
 type EduCourseVo struct {
+	Id              string	  `json:"id"`
 	BuyCount        uint64    `json:"buy_count"`
 	Cover           string    `json:"cover"`
 	LessonNum       uint      `json:"lesson_num"`
@@ -78,15 +80,44 @@ func (m *EduCourse) Delete() (err error) {
 	return Remove(m)
 }
 
-//Create course and description
+//同时创建简介
 func (m *EduCourse) CreateAll(description *EduCourseDescription) (err error) {
 	tx := db.Begin()
-	if err = Create(m);err != nil {
+	if err = Create(m,tx);err != nil {
 		tx.Rollback()
 		return
 	}
 	description.Id = m.Id
-	if err = description.Create();err != nil {
+	if err = Create(description,tx);err != nil {
+		tx.Rollback()
+		return
+	}
+	return tx.Commit().Error
+}
+
+// 同时查出简介
+func (m *EduCourse) OneAll() (one *EduCourseVo,err error) {
+	course,courseDescription,description := &EduCourse{},&EduCourseDescription{Id:m.Id},&EduCourseDescription{}
+	if err = One(m, course);err != nil {
+		return nil,err
+	}
+	courseVo := &EduCourseVo{}
+	util.CopyStruct(course,courseVo)
+	if err = One(courseDescription, description);err == nil {
+		courseVo.Description = description.Description
+	}
+	return courseVo,nil
+}
+
+//同时修改简介
+func (m *EduCourse) UpdateAll(description *EduCourseDescription) (err error) {
+	tx := db.Begin()
+	if err = Update(m,tx);err != nil {
+		tx.Rollback()
+		return
+	}
+	description.Id = m.Id
+	if err = Update(description,tx);err != nil {
 		tx.Rollback()
 		return
 	}
