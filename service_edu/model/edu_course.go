@@ -6,21 +6,22 @@ import (
 )
 
 type EduCourseVo struct {
-	Id              string	  `json:"id"`
-	BuyCount        uint64    `json:"buy_count"`
-	Cover           string    `json:"cover"`
-	LessonNum       uint      `json:"lesson_num"`
-	Price           float32   `json:"price"`
-	Status          string    `json:"status"`
-	SubjectId       string    `json:"subject_id"`
-	SubjectParentId string    `json:"subject_parent_id"`
-	TeacherId       string    `json:"teacher_id"`
-	Title           string    `json:"title"`
-	Version         uint64    `json:"version"`
-	ViewCount       uint64    `json:"view_count"`
-	Description 	string	  `json:"description"`
+	Id              string  `json:"id"`
+	BuyCount        uint64  `json:"buy_count"`
+	Cover           string  `json:"cover"`
+	LessonNum       uint    `json:"lesson_num"`
+	Price           float32 `json:"price"`
+	Status          string  `json:"status"`
+	SubjectId       string  `json:"subject_id"`
+	SubjectParentId string  `json:"subject_parent_id"`
+	TeacherId       string  `json:"teacher_id"`
+	Title           string  `json:"title"`
+	Version         uint64  `json:"version"`
+	ViewCount       uint64  `json:"view_count"`
+	Description     string  `json:"description"`
 }
 
+// 和模型关联的结构体
 type EduCourse struct {
 	BuyCount        uint64    `gorm:"column:buy_count" form:"buy_count" json:"buy_count" comment:"销售数量" columnType:"bigint unsigned" dataType:"bigint" columnKey:""`
 	Cover           string    `gorm:"column:cover" form:"cover" json:"cover" comment:"课程封面图片路径" columnType:"varchar(255)" dataType:"varchar" columnKey:""`
@@ -83,12 +84,12 @@ func (m *EduCourse) Delete() (err error) {
 //同时创建简介
 func (m *EduCourse) CreateAll(description *EduCourseDescription) (err error) {
 	tx := db.Begin()
-	if err = Create(m,tx);err != nil {
+	if err = Create(m, tx); err != nil {
 		tx.Rollback()
 		return
 	}
 	description.Id = m.Id
-	if err = Create(description,tx);err != nil {
+	if err = Create(description, tx); err != nil {
 		tx.Rollback()
 		return
 	}
@@ -96,30 +97,47 @@ func (m *EduCourse) CreateAll(description *EduCourseDescription) (err error) {
 }
 
 // 同时查出简介
-func (m *EduCourse) OneAll() (one *EduCourseVo,err error) {
-	course,courseDescription,description := &EduCourse{},&EduCourseDescription{Id:m.Id},&EduCourseDescription{}
-	if err = One(m, course);err != nil {
-		return nil,err
+func (m *EduCourse) OneAll() (one *EduCourseVo, err error) {
+	course, courseDescription, description := &EduCourse{}, &EduCourseDescription{Id: m.Id}, &EduCourseDescription{}
+	if err = One(m, course); err != nil {
+		return nil, err
 	}
 	courseVo := &EduCourseVo{}
-	util.CopyStruct(course,courseVo)
-	if err = One(courseDescription, description);err == nil {
+	util.CopyStruct(course, courseVo)
+	if err = One(courseDescription, description); err == nil {
 		courseVo.Description = description.Description
 	}
-	return courseVo,nil
+	return courseVo, nil
 }
 
 //同时修改简介
 func (m *EduCourse) UpdateAll(description *EduCourseDescription) (err error) {
 	tx := db.Begin()
-	if err = Update(m,tx);err != nil {
+	if err = Update(m, tx); err != nil {
 		tx.Rollback()
 		return
 	}
 	description.Id = m.Id
-	if err = Update(description,tx);err != nil {
+	if err = Update(description, tx); err != nil {
 		tx.Rollback()
 		return
 	}
 	return tx.Commit().Error
+}
+
+type CoursePublishVo struct {
+	Title       string `json:"title"`
+	Cover       string `json:"cover"`
+	LessonNum   int    `json:"lesson_num"`
+	OneSubject  string `json:"one_subject"`
+	TwoSubject  string `json:"two_subject"`
+	TeacherName string `json:"teacher_name"`
+	Price       string `json:"price"`
+	Description string `json:"description"`
+}
+
+func (m *EduCourse) GetCoursePublishVo() (vo *CoursePublishVo, err error) {
+	vo = &CoursePublishVo{}
+	err = db.Raw("SELECT ec.id, ec.price, ec.lesson_num, ec.cover, ecd.description, et.`name` AS teacher_name, es1.title AS one_subject, es2.title AS two_subject FROM edu_course ec LEFT JOIN edu_course_description ecd ON ec.id = ecd.id LEFT JOIN edu_teacher et ON ec.title = et.id LEFT JOIN edu_subject es1 ON ec.subject_id = es1.id LEFT JOIN edu_subject es2 ON ec.subject_parent_id = es2.id WHERE ec.id = ? limit 1", m.Id).Scan(vo).Error
+	return
 }

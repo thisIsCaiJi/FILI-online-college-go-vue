@@ -6,9 +6,6 @@ import (
 	"github.com/thisIsCaiJi/online_college/service_oss/util"
 )
 
-func init(){
-	group.POST("/eduoss/fileoss",UploadFileAvtar)
-}
 
 func UploadFileAvtar(context *gin.Context)  {
 	file, header, err := context.Request.FormFile("file")

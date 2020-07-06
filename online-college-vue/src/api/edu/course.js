@@ -27,4 +27,10 @@ export default {
       data: courseInfo
     })
   },
+  getCoursePublish(id) {
+    return request({
+      url: `/eduservice/course/coursePublish/${id}`,
+      method: 'get',
+    })
+  }
 }

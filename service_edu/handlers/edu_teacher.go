@@ -7,14 +7,7 @@ import (
 	"strconv"
 )
 
-func init() {
-	group.POST("/eduservice/edu-teacher/pageTeacherCondition/:current/:limit", PageTeacherConditionPost)
-	group.POST("/eduservice/edu-teacher/addTeacher", AddTeacher)
-	group.GET("/eduservice/edu-teacher/getTeacher/:id", GetTeacherById)
-	group.POST("/eduservice/edu-teacher/updateTeacher", UpdateTeacher)
-	group.DELETE("/eduservice/edu-teacher/:id", RemoveTeacher)
-	group.GET("/eduservice/edu-teacher/all", TeacherList)
-}
+
 
 func PageTeacherConditionPost(ctx *gin.Context) {
 	var query model.TeacherQuery
@@ -34,10 +27,10 @@ func PageTeacherConditionPost(ctx *gin.Context) {
 	teachers, total, err := eduteacher.List(currentInt, limitInt, query)
 	if err != nil {
 		logrus.Errorf("分页查询讲师数据失败,err:%v\n", err)
-		JsonError(ctx)
+		jsonError(ctx)
 		return
 	}
-	JsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
+	jsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
 }
 
 func AddTeacher(ctx *gin.Context) {
@@ -47,10 +40,10 @@ func AddTeacher(ctx *gin.Context) {
 	err := eduTeacher.Add()
 	if err != nil {
 		logrus.Errorf("添加讲师数据失败,err:%v\n", err)
-		JsonError(ctx)
+		jsonError(ctx)
 		return
 	}
-	JsonSuccess(ctx)
+	jsonSuccess(ctx)
 }
 
 func GetTeacherById(ctx *gin.Context) {
@@ -60,10 +53,10 @@ func GetTeacherById(ctx *gin.Context) {
 	teacher, err := eduTeacher.GetById()
 	if err != nil {
 		logrus.Errorf("查询讲师数据失败,err:%v\n", err)
-		JsonError(ctx)
+		jsonError(ctx)
 		return
 	}
-	JsonSuccessKV(ctx, "teacher", teacher)
+	jsonSuccessKV(ctx, "teacher", teacher)
 }
 
 func UpdateTeacher(ctx *gin.Context) {
@@ -72,17 +65,17 @@ func UpdateTeacher(ctx *gin.Context) {
 	t, err := eduTeacher.GetById()
 	if err != nil {
 		logrus.Errorf("修改讲师数据失败,err:%v\n", err)
-		JsonSuccess(ctx)
+		jsonSuccess(ctx)
 		return
 	}
 	eduTeacher.GmtCreate = t.GmtCreate
 	err = eduTeacher.Update()
 	if err != nil {
 		logrus.Errorf("修改讲师数据失败,err:%v\n", err)
-		JsonError(ctx)
+		jsonError(ctx)
 		return
 	}
-	JsonSuccess(ctx)
+	jsonSuccess(ctx)
 }
 
 func RemoveTeacher(ctx *gin.Context) {
@@ -91,19 +84,19 @@ func RemoveTeacher(ctx *gin.Context) {
 	err := eduTeacher.Remove()
 	if err != nil {
 		logrus.Errorf("逻辑删除讲师数据失败,err:%v\n", err)
-		JsonError(ctx)
+		jsonError(ctx)
 		return
 	}
-	JsonSuccess(ctx)
+	jsonSuccess(ctx)
 }
 
 func TeacherList(ctx *gin.Context) {
 	eduTeacher := &model.EduTeacher{}
 	teachers, total, err := eduTeacher.All()
 	if err != nil {
-		HandlerError(err, "查询讲师数据失败")
-		JsonErrorMessage(ctx, "查询讲师数据失败")
+		printError(err, "查询讲师数据失败")
+		jsonErrorMessage(ctx, "查询讲师数据失败")
 		return
 	}
-	JsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
+	jsonSuccessMap(ctx, map[string]interface{}{"rows": teachers, "total": total})
 }

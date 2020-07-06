@@ -3,7 +3,7 @@ import request from '@/utils/request'
 export default {
     getChapterVideo(courseInfo) {
         return request({
-            url: `/eduservice/chapterVideo/${courseInfo}`,
+            url: `/eduservice/chapter/chapterVideo/${courseInfo}`,
             method: 'get',
         })
     },
@@ -16,7 +16,7 @@ export default {
     },
     getChapter(chapterId){
         return request({
-            url: `/eduservice/chapter/${chapterId}`,
+            url: `/eduservice/chapter/getChapter/${chapterId}`,
             method: 'get',
         })
     },

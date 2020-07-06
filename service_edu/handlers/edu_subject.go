@@ -7,28 +7,24 @@ import (
 	"path"
 )
 
-func init(){
-	group.POST("/eduservice/subject/import",ImportSubject)
-	group.GET("/eduservice/subject/allSubject",GetAllSubject)
-}
 
 func ImportSubject(ctx *gin.Context) {
 	file, header, err := ctx.Request.FormFile("file")
 	if err != nil {
-		HandlerError(err,"上传失败")
-		JsonErrorMessage(ctx,"上传失败")
+		printError(err,"上传失败")
+		jsonErrorMessage(ctx,"上传失败")
 		return
 	}
 	ty := path.Ext(header.Filename)
 	if ty != ".xlsx" {
-		HandlerError(err,"只能上传.xlsx表格文件")
-		JsonErrorMessage(ctx,"只能上传.xlsx表格文件")
+		printError(err,"只能上传.xlsx表格文件")
+		jsonErrorMessage(ctx,"只能上传.xlsx表格文件")
 		return
 	}
 	xlFile,err := excelize.OpenReader(file)
 	if err != nil {
-		HandlerError(err,"上传失败")
-		JsonErrorMessage(ctx,"上传失败")
+		printError(err,"上传失败")
+		jsonErrorMessage(ctx,"上传失败")
 		return
 	}
 	rows := xlFile.GetRows("课程信息")
@@ -41,7 +37,7 @@ func ImportSubject(ctx *gin.Context) {
 				if notexist {
 					err = subjectSave.Add()
 					if err != nil {
-						HandlerError(err,"导入一级课程错误")
+						printError(err,"导入一级课程错误")
 						continue
 					}
 					id = subjectSave.Id
@@ -53,14 +49,14 @@ func ImportSubject(ctx *gin.Context) {
 				if notexist {
 					err = subjectSave.Add()
 					if err != nil {
-						HandlerError(err,"导入二级课程错误")
+						printError(err,"导入二级课程错误")
 						continue
 					}
 				}
 			}
 		}
 	}
-	JsonSuccess(ctx)
+	jsonSuccess(ctx)
 }
 
 //课程分类列表，树形结构
@@ -69,12 +65,12 @@ func GetAllSubject(ctx *gin.Context){
 	subject.ParentId = "0"
 	oneSub,_,err := subject.List()
 	if err != nil {
-		HandlerError(err,"查询一级课程错误")
+		printError(err,"查询一级课程错误")
 		return
 	}
 	twoSub,err := subject.GetTwoSub()
 	if err != nil {
-		HandlerError(err,"查询二级课程错误")
+		printError(err,"查询二级课程错误")
 		return
 	}
 	list := make([]model.NodeSubject,0,len(*oneSub))
@@ -97,6 +93,6 @@ func GetAllSubject(ctx *gin.Context){
 			*m[sub2.ParentId] = append(*m[sub2.ParentId],two)
 		}
 	}
-	JsonSuccessKV(ctx,"list",list)
+	jsonSuccessKV(ctx,"list",list)
 }
 
