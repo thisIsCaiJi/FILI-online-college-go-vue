@@ -24,9 +24,9 @@ export default {
     return {
       a: this.value,
       init: {
-        language_url: "/tinymce/zh_CN.js",
+        language_url: "./tinymce/zh_CN.js",
         language: "zh_CN",
-        skin_url: "/tinymce/skins/ui/oxide",
+        skin_url: "./tinymce/skins/ui/oxide",
         height: 300,
         plugins: "link lists image code table wordcount ",
         toolbar: "undo redo | styleselect | bold italic | link image",

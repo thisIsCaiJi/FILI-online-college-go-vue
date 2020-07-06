@@ -1,8 +1,8 @@
 {
-  "name": "vue-admin-template",
-  "version": "4.3.0",
-  "description": "A vue admin template with Element UI & axios & iconfont & permission control & lint",
-  "author": "Pan <panfree23@gmail.com>",
+  "name": "online-college-admin",
+  "version": "0.0.1",
+  "description": "Online college background management system",
+  "author": "XiongPan <xiongpan1995@foxmail.com>",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve",
