@@ -21,6 +21,14 @@ type EduCourseVo struct {
 	Description     string  `json:"description"`
 }
 
+type EduCourseQuery struct {
+	Status          string  `json:"status"`
+	Title           string  `json:"title"`
+}
+
+const CourseStatusDraft = "Draft"
+const CourseStatusNormal = "Normal"
+
 // 和模型关联的结构体
 type EduCourse struct {
 	BuyCount        uint64    `gorm:"column:buy_count" form:"buy_count" json:"buy_count" comment:"销售数量" columnType:"bigint unsigned" dataType:"bigint" columnKey:""`
@@ -60,9 +68,25 @@ func (m *EduCourse) All() (list *[]EduCourse, total uint, err error) {
 }
 
 //page
-func (m *EduCourse) AllPage() (list *[]EduCourse, current, limit int, total uint, err error) {
+func (m *EduCourse) AllPage(current, limit int) (list *[]EduCourse, total uint, err error) {
 	list = &[]EduCourse{}
 	total, err = ListPage(m, current, limit, list)
+	return
+}
+
+//page
+func (m *EduCourse) ListPage(current, limit int, query *EduCourseQuery) (list *[]EduCourse, total uint, err error) {
+	list = &[]EduCourse{}
+	theDb := db.Model(m)
+	if query.Status == CourseStatusNormal {
+		theDb = theDb.Where("status = ?",CourseStatusNormal)
+	}else if query.Status != "" {
+		theDb = theDb.Where("status != ?",CourseStatusNormal)
+	}
+	if query.Title != "" {
+		theDb = theDb.Where("title like ?","%"+query.Title+"%")
+	}
+	err = theDb.Count(&total).Limit(limit).Offset((current-1) * limit).Find(list).Error
 	return
 }
 
@@ -138,6 +162,6 @@ type CoursePublishVo struct {
 
 func (m *EduCourse) GetCoursePublishVo() (vo *CoursePublishVo, err error) {
 	vo = &CoursePublishVo{}
-	err = db.Raw("SELECT ec.id, ec.price, ec.lesson_num, ec.cover, ecd.description, et.`name` AS teacher_name, es1.title AS one_subject, es2.title AS two_subject FROM edu_course ec LEFT JOIN edu_course_description ecd ON ec.id = ecd.id LEFT JOIN edu_teacher et ON ec.title = et.id LEFT JOIN edu_subject es1 ON ec.subject_id = es1.id LEFT JOIN edu_subject es2 ON ec.subject_parent_id = es2.id WHERE ec.id = ? limit 1", m.Id).Scan(vo).Error
+	err = db.Raw("SELECT ec.id, ec.title, ec.price, ec.lesson_num, ec.cover, ecd.description, et.`name` AS teacher_name, es1.title AS two_subject, es2.title AS one_subject FROM edu_course ec LEFT JOIN edu_course_description ecd ON ec.id = ecd.id LEFT JOIN edu_teacher et ON ec.teacher_id = et.id LEFT JOIN edu_subject es1 ON ec.subject_id = es1.id LEFT JOIN edu_subject es2 ON ec.subject_parent_id = es2.id WHERE ec.id = ? limit 1", m.Id).Scan(vo).Error
 	return
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-steps :active="0" finish-status="wait">
+    <el-steps :active="0" finish-status="wait" align-center style="margin-bottom: 40px;">
       <el-step title="填写课程基本信息"></el-step>
       <el-step title="创建课程大纲"></el-step>
       <el-step title="最终发布"></el-step>
@@ -121,29 +121,40 @@ export default {
       });
     },
     addCourseInfo(courseInfo) {
-      courseApi.addCourseInfo(courseInfo).then(response => {
-        this.$message({
-          message: "添加课程信息成功",
-          type: "success"
+      courseApi
+        .addCourseInfo(courseInfo)
+        .then(response => {
+          this.$message({
+            message: "添加课程信息成功",
+            type: "success"
+          });
+          var id = response.data.id;
+          this.$router.push({ path: `/course/chapter/${id}` });
+        })
+        .catch(response => {
+          this.saveBtnDisabled = false;
         });
-        var id = response.data.id;
-        this.$router.push({ path: `/course/chapter/${id}` });
-      });
     },
     updateCourseInfo(courseInfo) {
-      courseApi.updateCourseInfo(courseInfo).then(response => {
-        this.$message({
-          message: "修改课程信息成功",
-          type: "success"
+      courseApi
+        .updateCourseInfo(courseInfo)
+        .then(response => {
+          this.$message({
+            message: "修改课程信息成功",
+            type: "success"
+          });
+          this.$router.push({ path: `/course/chapter/${this.courseId}` });
+        })
+        .catch(response => {
+          this.saveBtnDisabled = false;
         });
-        this.$router.push({ path: `/course/chapter/${this.courseId}` });
-      });
     },
     saveOrUpdate() {
-      if (!this.courseInfo.id){
-        this.addCourseInfo(this.courseInfo)
-      }else {
-        this.updateCourseInfo(this.courseInfo)
+      this.saveBtnDisabled = true;
+      if (!this.courseInfo.id) {
+        this.addCourseInfo(this.courseInfo);
+      } else {
+        this.updateCourseInfo(this.courseInfo);
       }
     },
     getListTeacher() {
@@ -202,14 +213,14 @@ export default {
 .avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
-  width: 300px;
-  height: 300px;
-  line-height: 300px;
+  width: 500px;
+  height: 278px;
+  line-height: 278px;
   text-align: center;
 }
 .avatar {
-  width: 300px;
-  height: 300px;
+  width: 500px;
+  height: 278px;
   display: block;
 }
 </style>

@@ -33,7 +33,7 @@ func (m *EduChapter) All() (list *[]EduChapter, total uint, err error) {
 }
 
 //page
-func (m *EduChapter) AllPage() (list *[]EduChapter, current, limit int, total uint, err error) {
+func (m *EduChapter) AllPage(current, limit int) (list *[]EduChapter, total uint, err error) {
 	list = &[]EduChapter{}
 	total, err = ListPage(m, current, limit, list)
 	return

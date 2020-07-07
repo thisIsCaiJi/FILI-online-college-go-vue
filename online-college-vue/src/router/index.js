@@ -72,13 +72,13 @@ export const constantRoutes = [
         path: 'save',
         name: '添加讲师',
         component: () => import('@/views/edu/teacher/save'),
-        meta: { title: '添加讲师', icon: 'tree' }
+        meta: { title: '添加讲师', icon: 'form' }
       },
       {
         path: 'edit/:id',
         name: '编辑讲师',
         component: () => import('@/views/edu/teacher/save'),
-        meta: { title: '编辑讲师', icon: 'tree' },
+        meta: { title: '编辑讲师', icon: 'form' },
         hidden: true
       }
     ]
@@ -101,7 +101,7 @@ export const constantRoutes = [
         path: 'save',
         name: '添加课程分类',
         component: () => import('@/views/edu/subject/save'),
-        meta: { title: '添加课程分类', icon: 'tree' }
+        meta: { title: '添加课程分类', icon: 'form' }
       }
     ]
   },
@@ -117,33 +117,33 @@ export const constantRoutes = [
         path: 'list',
         name: '课程列表',
         component: () => import('@/views/edu/course/list'),
-        meta: { title: '课程列表', icon: 'tree' }
+        meta: { title: '课程列表', icon: 'table' }
       },
       {
         path: 'info',
         name: '添加课程',
         component: () => import('@/views/edu/course/info'),
-        meta: { title: '添加课程', icon: 'tree' }
+        meta: { title: '添加课程', icon: 'form' }
       },
       {
         path: 'info/:id',
-        name: '添加课程',
+        name: '编辑课程基本信息',
         component: () => import('@/views/edu/course/info'),
-        meta: { title: '添加课程分类', icon: 'tree' },
+        meta: { title: '编辑课程基本信息' },
         hidden: true
       },
       {
         path: 'chapter/:id',
-        name: '添加课程',
+        name: '编辑课程大纲',
         component: () => import('@/views/edu/course/chapter'),
-        meta: { title: '添加课程分类', icon: 'tree' },
+        meta: { title: '编辑课程大纲' },
         hidden: true
       },
       {
         path: 'publish/:id',
-        name: '添加课程',
+        name: '发布课程',
         component: () => import('@/views/edu/course/publish'),
-        meta: { title: '添加课程分类', icon: 'tree' },
+        meta: { title: '发布课程' },
         hidden: true
       },
     ]

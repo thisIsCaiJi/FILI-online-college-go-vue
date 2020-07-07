@@ -41,7 +41,7 @@ func (m *EduVideo) All() (list *[]EduVideo, total uint, err error) {
 }
 
 //page
-func (m *EduVideo) AllPage() (list *[]EduVideo, current, limit int, total uint, err error) {
+func (m *EduVideo) AllPage(current, limit int) (list *[]EduVideo, total uint, err error) {
 	list = &[]EduVideo{}
 	total, err = ListPage(m, current, limit, list)
 	return

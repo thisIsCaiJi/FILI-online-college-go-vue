@@ -37,16 +37,11 @@ func (s *EduSubject) One() (one *EduSubject, err error) {
 	return one, err
 }
 
-//List
-func (s *EduSubject) ListPage(current, limit int, query SubjectQuery) (list *[]EduSubject, total uint, err error) {
+//page
+func (s *EduSubject) AllPage(current, limit int) (list *[]EduSubject, total uint, err error) {
 	list = &[]EduSubject{}
-	if err := db.Limit(limit).Offset((current - 1) * limit).Find(list).Error; err != nil {
-		return nil, 0, err
-	}
-	if err := db.Model(s).Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-	return list, total, nil
+	total, err = ListPage(s, current, limit, list)
+	return
 }
 
 //List

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-steps :active="2" finish-status="wait">
+    <el-steps :active="2" finish-status="wait" align-center style="margin-bottom: 40px;">
       <el-step title="填写课程基本信息"></el-step>
       <el-step title="创建课程大纲"></el-step>
       <el-step title="最终发布"></el-step>
@@ -9,41 +9,120 @@
       <img :src="coursePublish.cover" />
       <div class="main">
         <h2>{{coursePublish.title}}</h2>
+        <p class="gray">
+          <span>共{{ coursePublish.lesson_num }}课时</span>
+        </p>
+        <p>
+          <span>所属分类：{{ coursePublish.one_subject }} — {{ coursePublish.two_subject }}</span>
+        </p>
+        <p>课程讲师：{{ coursePublish.teacher_name }}</p>
+        <h3 class="red">￥{{ coursePublish.price }}</h3>
       </div>
     </div>
-    <el-button style="margin-top: 12px;" @click="previous">上一步</el-button>
-    <el-button type="primary" style="margin-top: 12px;" @click="next">发布</el-button>
+    <div>
+      <el-button style="margin-top: 12px;" @click="previous">返回修改</el-button>
+      <el-button
+        :disabled="saveBtnDisabled"
+        type="primary"
+        style="margin-top: 12px;"
+        @click="publishCourse"
+      >发布课程</el-button>
+    </div>
   </div>
 </template>
 
 <script>
-import courseApi  from "@/api/edu/course";
+import courseApi from "@/api/edu/course";
 
 export default {
   data() {
     return {
+      saveBtnDisabled: false,
       courseId: "",
-      coursePublish: {title:''},
+      coursePublish: { title: "" }
     };
   },
   created() {
     if (this.$route.params && this.$route.params.id) {
       this.courseId = this.$route.params.id;
-      this.getCoursePublishById(this.courseId)
+      this.getCoursePublishById(this.courseId);
     }
   },
   methods: {
     getCoursePublishById(id) {
       courseApi.getCoursePublish(id).then(response => {
-        this.coursePublish = response.data.coursePublish
-      })
+        this.coursePublish = response.data.coursePublish;
+      });
     },
     previous() {
       this.$router.push({ path: `/course/chapter/${this.courseId}` });
     },
-    next() {
-      this.$router.push({ path: "/course/list" });
+    publishCourse() {
+      this.saveBtnDisabled = true
+      courseApi.publishCourse(this.courseId).then(response => {
+        this.$message({
+          type: "success",
+          message: "课时发布成功!"
+        });
+        this.$router.push({ path: "/course/list" });
+      }).catch(response => {
+        this.saveBtnDisabled = false
+      })
     }
   }
 };
 </script>
+
+
+<style scoped>
+.ccInfo {
+  background: #f5f5f5;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px dashed #ddd;
+  margin-bottom: 40px;
+  position: relative;
+}
+.ccInfo img {
+  background: #d6d6d6;
+  width: 500px;
+  height: 278px;
+  display: block;
+  float: left;
+  border: none;
+}
+.ccInfo .main {
+  margin-left: 520px;
+}
+
+.ccInfo .main h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  line-height: 1;
+  font-weight: normal;
+}
+.ccInfo .main p {
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  line-height: 24px;
+  max-height: 48px;
+  overflow: hidden;
+}
+
+.ccInfo .main p {
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  line-height: 24px;
+  max-height: 48px;
+  overflow: hidden;
+}
+.ccInfo .main h3 {
+  left: 540px;
+  bottom: 20px;
+  line-height: 1;
+  font-size: 28px;
+  color: #d32f24;
+  font-weight: normal;
+  position: absolute;
+}
+</style>

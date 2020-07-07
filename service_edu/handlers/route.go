@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -42,6 +41,8 @@ func InitRouter() *gin.Engine {
 		course.GET("/getCourseInfo/:id",GetCourseInfo)
 		course.POST("/updateCourseInfo",UpdateCourseInfo)
 		course.GET("/coursePublish/:id",GetCoursePublishVo)
+		course.PUT("/publish/:id",PublishCourse)
+		course.POST("/list/:current/:limit",GetCourseList)
 	}
 	chapter := router.Group("api/eduservice/chapter")
 	{
@@ -63,7 +64,6 @@ func Cors() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		fmt.Printf("origin:%s\n", c.GetHeader("Access-Control-Allow-Origin"))
 		// 放行所有OPTIONS方法，因为有的模板是要请求两次的
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)

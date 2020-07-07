@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-steps :active="1" finish-status="wait">
+    <el-steps :active="1" finish-status="wait" align-center style="margin-bottom: 40px;">
       <el-step title="填写课程基本信息"></el-step>
       <el-step title="创建课程大纲"></el-step>
       <el-step title="最终发布"></el-step>
@@ -34,7 +34,6 @@
 
     <el-button style="margin-top: 12px; " @click="previous">上一步</el-button>
     <el-button
-      :disabled="saveBtnDisabled"
       type="primary"
       style="margin-top: 12px;"
       @click="next"
@@ -90,7 +89,6 @@ export default {
     return {
       dialogVideoFormVisible: false,
       dialogCHapterFormVisible: false,
-      saveBtnDisabled: false,
       chapterVideoList: [],
       courseId: "", //课程id
       chapter: { title: "", sort: 0 },
@@ -160,7 +158,7 @@ export default {
     },
     // 添加或更新video
     saveOrUpdateVideo() {
-     if (!this.video.id) {
+      if (!this.video.id) {
         this.addVideo(this.video);
       } else {
         this.updateVideo(this.video);

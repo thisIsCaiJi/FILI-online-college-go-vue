@@ -43,9 +43,9 @@ func jsonSuccessMap(ctx *gin.Context, m map[string]interface{}) {
 	ctx.JSON(200, ReturnOk().Data(m).H())
 }
 
-const SUCCESS_CODE = 20000
+const SuccessCode = 20000
 
-const FAILED_CODE = 20001
+const FailedCode = 20001
 
 type Result struct {
 	code int
@@ -56,20 +56,20 @@ type Result struct {
 
 func ReturnOk() Result {
 	result := Result{
-		code:SUCCESS_CODE,
-		success:true,
-		message:"成功",
-		data:make(map[string]interface{},0),
+		code:    SuccessCode,
+		success: true,
+		message: "成功",
+		data:    make(map[string]interface{},0),
 	}
 	return result
 }
 
 func ReturnError() Result {
 	result := Result{
-		code:FAILED_CODE,
-		success:false,
-		message:"失败",
-		data:make(map[string]interface{},0),
+		code:    FailedCode,
+		success: false,
+		message: "失败",
+		data:    make(map[string]interface{},0),
 	}
 	return result
 }
