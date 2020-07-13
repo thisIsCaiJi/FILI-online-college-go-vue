@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/thisIsCaiJi/online_college/service_edu/model"
 	"github.com/thisIsCaiJi/online_college/service_edu/util"
@@ -100,4 +101,19 @@ func GetCourseList(ctx *gin.Context){
 		return
 	}
 	jsonSuccessMap(ctx, map[string]interface{}{"rows": courses, "total": total})
+}
+
+func DeleteCourse(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
+	course := model.EduCourse{Id:id}
+	fmt.Printf("========== %v",course)
+	err := course.RemoveAll()
+	if handleError(ctx,err) {
+		return
+	}
+	jsonSuccess(ctx)
 }

@@ -43,7 +43,7 @@
             type="danger"
             size="mini"
             icon="el-icon-delete"
-            @click="removeTeacherById(scope.row.id)"
+            @click="removeCourseInfoById(scope.row.id)"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -93,15 +93,15 @@ export default {
       this.courseQuery = {};
       this.getList();
     },
-    removeTeacherById(id) {
-      this.$confirm("此操作将永久删除讲师记录, 是否继续?", "提示", {
+    removeCourseInfoById(id) {
+      this.$confirm("此操作将永久删除课程, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          teacher
-            .removeTeacherById(id)
+          courseApi
+            .removeCourseInfoById(id)
             .then(response => {
               this.$message({
                 message: "删除成功",

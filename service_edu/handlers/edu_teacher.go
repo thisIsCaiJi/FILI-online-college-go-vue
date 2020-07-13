@@ -62,6 +62,10 @@ func GetTeacherById(ctx *gin.Context) {
 func UpdateTeacher(ctx *gin.Context) {
 	var eduTeacher model.EduTeacher
 	ctx.ShouldBindJSON(&eduTeacher)
+	if eduTeacher.Id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	t, err := eduTeacher.GetById()
 	if err != nil {
 		logrus.Errorf("修改讲师数据失败,err:%v\n", err)
@@ -80,6 +84,10 @@ func UpdateTeacher(ctx *gin.Context) {
 
 func RemoveTeacher(ctx *gin.Context) {
 	id := ctx.Param("id")
+	if id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	eduTeacher := model.EduTeacher{Id: id}
 	err := eduTeacher.Remove()
 	if err != nil {

@@ -43,7 +43,6 @@ export default {
     },
     getAllSubject() {
         subjectApi.getAllSubject().then(response => {
-            console.log(response.data)
           this.data2 = response.data.list;
         });
     }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -13,9 +14,10 @@ type EduTeacher struct {
 	Level       int       `json:"level"`
 	Avatar      string    `json:"avatar"`
 	Sort        int       `json:"sort"`
-	IsDelete    int `json:"is_delete"`
 	GmtCreate   time.Time `json:"gmtCreate"`
 	GmtModified time.Time `json:"gmtModified"`
+	DeletedAt *time.Time `sql:"index"`
+	gorm.Model
 }
 
 func (*EduTeacher) TableName() string {
@@ -33,7 +35,7 @@ func (t *EduTeacher) List(current, limit int, query TeacherQuery) (*[]EduTeacher
 	logrus.Infof("query:%v\n", query)
 	var eduTeacher []EduTeacher
 	var total int
-	whereSql := "is_delete = 0"
+	whereSql := ""
 	var whereValue []interface{}
 	if query.Name != "" {
 		whereSql += " and name like ?"
@@ -63,7 +65,8 @@ func (t *EduTeacher) Add() error {
 
 func (t *EduTeacher) GetById() (one *EduTeacher,err error) {
 	one = &EduTeacher{}
-	m := &EduTeacher{Id:t.Id,IsDelete:0}
+	//m := &EduTeacher{Id:t.Id,IsDelete:0}
+	m := &EduTeacher{Id:t.Id}
 	err = One(m,one)
 	return
 }
@@ -74,18 +77,18 @@ func (t *EduTeacher) Update() error {
 }
 
 func (t *EduTeacher) Remove() error {
-	err := db.Model(t).Update("is_delete",1).Error
+	err := Remove(t)
 	return err
 }
 
-func (t *EduTeacher) Delete() error {
-	err := Remove(t)
+func (t *EduTeacher) UnscopedRemove() error {
+	err := UnscopedRemove(t)
 	return err
 }
 
 func (t *EduTeacher) All() (teachers *[]EduTeacher,total uint,err error) {
 	teachers = &[]EduTeacher{}
-	t.IsDelete = 0
+	//t.IsDelete = 0
 	total,err = List(t,teachers)
 	return
 }

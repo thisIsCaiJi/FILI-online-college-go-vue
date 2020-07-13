@@ -36,7 +36,6 @@ type EduCourse struct {
 	GmtCreate       time.Time `gorm:"column:gmt_create" form:"gmt_create" json:"gmt_create" comment:"创建时间" columnType:"datetime" dataType:"datetime" columnKey:""`
 	GmtModified     time.Time `gorm:"column:gmt_modified" form:"gmt_modified" json:"gmt_modified" comment:"更新时间" columnType:"datetime" dataType:"datetime" columnKey:""`
 	Id              string    `gorm:"column:id" form:"id" json:"id" comment:"课程ID" columnType:"char(19)" dataType:"char" columnKey:"PRI"`
-	IsDeleted       int       `gorm:"column:is_deleted" form:"is_deleted" json:"is_deleted" comment:"逻辑删除 1（true）已删除， 0（false）未删除" columnType:"tinyint" dataType:"tinyint" columnKey:""`
 	LessonNum       uint      `gorm:"column:lesson_num" form:"lesson_num" json:"lesson_num" comment:"总课时" columnType:"int unsigned" dataType:"int" columnKey:""`
 	Price           float32   `gorm:"column:price" form:"price" json:"price" comment:"课程销售价格，设置为0则可免费观看" columnType:"decimal(10,2) unsigned" dataType:"decimal" columnKey:""`
 	Status          string    `gorm:"column:status" form:"status" json:"status" comment:"课程状态 Draft未发布  Normal已发布" columnType:"varchar(10)" dataType:"varchar" columnKey:""`
@@ -145,6 +144,32 @@ func (m *EduCourse) UpdateAll(description *EduCourseDescription) (err error) {
 	if err = Update(description, tx); err != nil {
 		tx.Rollback()
 		return
+	}
+	return tx.Commit().Error
+}
+
+// 删除课程和课程的章节、课时、描述
+func (m *EduCourse) RemoveAll() (err error) {
+	tx := db.Begin()
+	// 删除课时
+	if err = Remove(&EduVideo{CourseId:m.Id},tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 删除章节
+	if err = Remove(&EduChapter{CourseId:m.Id},tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 删除描述
+	if err = Remove(&EduCourseDescription{Id:m.Id},tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 删除课程
+	if err = Remove(m,tx); err != nil {
+		tx.Rollback()
+		return err
 	}
 	return tx.Commit().Error
 }

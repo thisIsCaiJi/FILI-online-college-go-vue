@@ -28,6 +28,10 @@ func GetVideo(ctx *gin.Context){
 
 func RemoveVideo(ctx *gin.Context) {
 	id := ctx.Param("id")
+	if id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	videoParam := &model.EduVideo{Id:id}
 	err := videoParam.Delete()
 	if handleError(ctx,err) {
@@ -39,6 +43,10 @@ func RemoveVideo(ctx *gin.Context) {
 func UpdateVideo(ctx *gin.Context) {
 	video := &model.EduVideo{}
 	ctx.ShouldBindJSON(video)
+	if video.Id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	err := video.Update()
 	if handleError(ctx,err) {
 		return

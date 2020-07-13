@@ -70,6 +70,10 @@ func GetChapterInfo(ctx *gin.Context){
 func UpdateChapterInfo(ctx *gin.Context){
 	chapter := &model.EduChapter{}
 	ctx.ShouldBindJSON(chapter)
+	if chapter.Id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	if err := chapter.Update();err!=nil {
 		jsonError(ctx)
 		return
@@ -79,6 +83,10 @@ func UpdateChapterInfo(ctx *gin.Context){
 
 func DeleteChapterInfo(ctx *gin.Context){
 	id := ctx.Param("id")
+	if id == "" {
+		jsonErrorMessage(ctx,"id不能为空")
+		return
+	}
 	chapter := &model.EduChapter{Id:id}
 	video := &model.EduVideo{ChapterId:id}
 	if total := video.Count();total > 0 {

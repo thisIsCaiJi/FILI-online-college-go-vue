@@ -65,9 +65,16 @@ func Update(m interface{},tx ...*gorm.DB) error {
 // 当tx不为空时为事务性
 func Remove(m interface{},tx ...*gorm.DB) error {
 	if len(tx) != 0 && tx[0] !=nil {
-		return tx[0].Delete(m).Error
+		return tx[0].Where(m).Delete(m).Error
 	}
-	return db.Delete(m).Error
+	return db.Where(m).Delete(m).Error
+}
+
+func UnscopedRemove(m interface{},tx ...*gorm.DB) error {
+	if len(tx) != 0 && tx[0] !=nil {
+		return tx[0].Where(m).Unscoped().Delete(m).Error
+	}
+	return db.Where(m).Unscoped().Delete(m).Error
 }
 
 func One(m interface{},one interface{}) error {

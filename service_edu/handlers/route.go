@@ -43,6 +43,7 @@ func InitRouter() *gin.Engine {
 		course.GET("/coursePublish/:id",GetCoursePublishVo)
 		course.PUT("/publish/:id",PublishCourse)
 		course.POST("/list/:current/:limit",GetCourseList)
+		course.DELETE("/courseInfo/:id",DeleteCourse)
 	}
 	chapter := router.Group("api/eduservice/chapter")
 	{
