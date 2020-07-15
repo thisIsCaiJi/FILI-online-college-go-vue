@@ -1,8 +1,8 @@
 vod:
   end_point: oss-cn-shenzhen.aliyuncs.com
-  key_id: LTAI4GJwPQk5DWhFQ6YAQi81
-  key_secret: eHJeCTnfpOzYMT5xO3tnjVT9G9mayU
-  bucket_name: fili-online-college-0001
+  key_id: 
+  key_secret:
+  bucket_name:
 
 server:
   port: 8083
