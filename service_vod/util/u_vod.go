@@ -1,12 +1,13 @@
-package service
+package util
 
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vod"
+	"github.com/thisIsCaiJi/online_college/service_vod/config"
+	"io"
 	"time"
 )
 
@@ -31,6 +32,19 @@ type UploadVideo struct {
 	FileName string
 	CoverURL string
 	Tags string
+}
+
+var VodClient *vod.Client
+
+func GetVodClient() *vod.Client {
+	if VodClient != nil {
+		return VodClient
+	}
+	client, err := InitVodClient(config.GetVodConfig().KeyId,config.GetVodConfig().KeySecret)
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
 
 // 创建视频上传请求并获取videoId、上传地址和凭证
@@ -95,16 +109,15 @@ func InitVodClient(accessKeyId string, accessKeySecret string) (client *vod.Clie
 	return vod.NewClientWithOptions(regionId, config, credential)
 }
 
-func UploadVideoLocalFile(client *vod.Client, uploadVideo UploadVideo, localFile string) {
+// 上传本地视频文件
+func UploadVideoLocalFile(client *vod.Client, uploadVideo UploadVideo, localFile string) (videoId string, err error) {
 	videoId, uploadAddress, uploadAuth, err := CreateUploadVideo(client, uploadVideo)
 	if err != nil {
-		panic(err)
+		return videoId, err
 	}
-	fmt.Printf("VideoId: %s\n UploadAddress: %s\n UploadAuth: %s",
-		videoId, uploadAddress, uploadAuth)
 	uploadAddressDecode, err := base64.StdEncoding.DecodeString(uploadAddress)
 	if err != nil {
-		panic(err)
+		return videoId, err
 	}
 	var uploadAddressDTO UploadAddressDTO
 	if err := json.Unmarshal(uploadAddressDecode, &uploadAddressDTO); err != nil {
@@ -112,14 +125,50 @@ func UploadVideoLocalFile(client *vod.Client, uploadVideo UploadVideo, localFile
 	}
 	uploadAuthDecode, err := base64.StdEncoding.DecodeString(uploadAuth)
 	if err != nil {
-		panic(err)
+		return videoId, err
 	}
 	var uploadAuthDTO UploadAuthDTO
 	json.Unmarshal(uploadAuthDecode,&uploadAuthDTO)
 	ossClient, err := InitOssClient(uploadAuthDTO, uploadAddressDTO)
 	if err != nil {
-		panic(err)
+		return videoId, err
 	}
 	UploadLocalFile(ossClient,uploadAddressDTO,localFile)
-	fmt.Println("Succeed, VideoId:", videoId)
+	return videoId, nil
+}
+
+ // 上传视频文件流
+func UploadVideoReader(client *vod.Client, uploadVideo UploadVideo, reader io.Reader) (videoId string, err error) {
+	videoId, uploadAddress, uploadAuth, err := CreateUploadVideo(client, uploadVideo)
+	if err != nil {
+		return videoId, err
+	}
+	uploadAddressDecode, err := base64.StdEncoding.DecodeString(uploadAddress)
+	if err != nil {
+		return videoId, err
+	}
+	var uploadAddressDTO UploadAddressDTO
+	if err := json.Unmarshal(uploadAddressDecode, &uploadAddressDTO); err != nil {
+		return videoId, err
+	}
+	uploadAuthDecode, err := base64.StdEncoding.DecodeString(uploadAuth)
+	if err != nil {
+		return videoId, err
+	}
+	var uploadAuthDTO UploadAuthDTO
+	json.Unmarshal(uploadAuthDecode,&uploadAuthDTO)
+	ossClient, err := InitOssClient(uploadAuthDTO, uploadAddressDTO)
+	if err != nil {
+		return videoId, err
+	}
+	UploadReader(ossClient,uploadAddressDTO,reader)
+	return videoId, nil
+}
+
+func DeleteVideo(client *vod.Client, videoId string) (response *vod.DeleteVideoResponse, err error) {
+	request := vod.CreateDeleteVideoRequest()
+	// 支持批量删除视频，多个用逗号分隔
+	request.VideoIds = videoId
+	request.AcceptFormat = "JSON"
+	return client.DeleteVideo(request)
 }

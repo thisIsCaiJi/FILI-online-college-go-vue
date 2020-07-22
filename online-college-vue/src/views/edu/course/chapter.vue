@@ -33,11 +33,7 @@
     </ul>
 
     <el-button style="margin-top: 12px; " @click="previous">上一步</el-button>
-    <el-button
-      type="primary"
-      style="margin-top: 12px;"
-      @click="next"
-    >保存并下一步</el-button>
+    <el-button type="primary" style="margin-top: 12px;" @click="next">保存并下一步</el-button>
 
     <el-dialog title="添加章节" :visible.sync="dialogCHapterFormVisible">
       <el-form :model="chapter" label-width="120px">
@@ -67,9 +63,22 @@
             <el-radio :label="1">是</el-radio>
             <el-radio :label="0">否</el-radio>
           </el-radio-group>
-          <el-form-item label="上传视频">
-            <!-- TODO -->
-          </el-form-item>
+        </el-form-item>
+        <el-form-item label="上传视频">
+          <el-upload
+            class="upload-demo"
+            :action="baseApi+'/eduvod/video/upload'"
+            :on-remove="handleRemove"
+            :before-remove="beforeRemove"
+            :on-success="handleVodUploadSuccess"
+            :limit="1"
+            :on-exceed="handleExceed"
+            :file-list="fileList"
+            accept=".mp4"
+          >
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传mp4文件，且不超过10mb</div>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -92,7 +101,9 @@ export default {
       chapterVideoList: [],
       courseId: "", //课程id
       chapter: { title: "", sort: 0 },
-      video: { title: "", sort: 0 }
+      video: { title: "", sort: 0 },
+      baseApi: process.env.VUE_APP_BASE_API,
+      fileList: []
     };
   },
   created() {
@@ -104,6 +115,32 @@ export default {
     }
   },
   methods: {
+    handleExceed() {
+      this.$message({
+        type: "warning",
+        message: "一个课时只能添加一个视频!"
+      });
+    },
+    // 删除时点确定调用的方法
+    handleRemove(file, fileList) {
+      videoApi.deleteAliyunvod(this.video.video_source_id).then(response => {
+        this.$message({
+          type: "success",
+          message: "删除视频成功!"
+        });
+        this.fileList = [];
+        this.video.video_source_id = "";
+        this.video.video_original_name = "";
+      });
+    },
+    beforeRemove(file, fileList) {
+      return this.$confirm(`确定移除 ${file.name}？`);
+    },
+    // 上传视频成功调用的方法
+    handleVodUploadSuccess(response, file, fileList) {
+      this.video.video_source_id = response.data.videoId;
+      this.video.video_original_name = file.name;
+    },
     // 打开编辑课时窗口
     openEditVideoDialog(id) {
       videoApi.getVideo(id).then(response => {

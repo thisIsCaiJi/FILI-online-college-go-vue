@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/thisIsCaiJi/online_college/service_oss/util"
 )
@@ -9,21 +8,18 @@ import (
 
 func UploadFileAvtar(context *gin.Context)  {
 	file, header, err := context.Request.FormFile("file")
-	if err != nil {
-		fmt.Printf("上传失败")
-		context.JSON(200,util.ReturnError().H())
+	if handleError(context,err){
 		return
 	}
 	dataLen := header.Size
 	if dataLen > int64(2)*1024*1024 {
-		context.JSON(200,util.ReturnError().Message("File size cannot be greater than 2MB!").H())
+		jsonErrorMessage(context,"File size cannot be greater than 2MB!")
 		return
 	}
 	// 上传文件流。
 	url,err := util.UploadFile(file,header)
-	if err != nil {
-		context.JSON(200,util.ReturnError().Message(err.Error()).H())
+	if handleError(context,err){
 		return
 	}
-	context.JSON(200,util.ReturnOk().DataKV("url",url).H())
+	jsonSuccessKV(context,"url",url)
 }
